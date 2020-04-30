@@ -25,3 +25,6 @@
     3. Make sure to add your API_KEY in AndroidManifest.xml under android/src/AndriodManifest.xml and in App.config.js
     4. Enable the above mentioned API's from you google console.(You may need a billing account)
     5. You are all set.Run your App.
+    
+# Demo gif
+![ReactNative-Maps](https://github.com/Marhatta/react-native-google-maps/blob/b43c59c0115710ef1bef94bc7f622b1bbaf0c24e/maps.gif)
