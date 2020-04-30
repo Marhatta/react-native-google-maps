@@ -27,7 +27,8 @@ const PlacesAutocomplete = (props) => {
       onPress={(data, details = null) => {
         // 'details' is provided when fetchDetails = true
         //All the details of the selected address will be here
-        console.log(details);
+        const {lat, lng} = details.geometry.location;
+        props.onSelectDestination(lat,lng);
       }}
       getDefaultValue={() => ''}
       styles={{

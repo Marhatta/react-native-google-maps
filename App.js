@@ -37,7 +37,9 @@ class App extends Component {
       routeCoordinates: [],
       distanceTravelled: 0,
       prevLatLng: {},
+      destination:{},
       locationAccessGranted:false,
+      distanceSrcDest:'',
     };
   }
 
@@ -65,7 +67,7 @@ class App extends Component {
     //listener for watching the position
     let watchId = Geolocation.watchPosition(
       position => {
-        console.log('=====================',position);
+        console.log("position",position);
         const {latitude, longitude} = position.coords;
         const {routeCoordinates, distanceTravelled} = this.state;
         const newCoordinate = {latitude, longitude};
@@ -79,6 +81,11 @@ class App extends Component {
             distanceTravelled + this.calcDistance(newCoordinate),
           prevLatLng: newCoordinate,
         });
+
+        //calculate distance remaining to destination
+        const {lat, lng} = this.state.destination;
+        let distanceSrcDest=this.calculateHaversineDifference(lat, lng);
+        this.setState({distanceSrcDest});
       },
       error => {
         this.setState({error: error.message});
@@ -87,6 +94,7 @@ class App extends Component {
         enableHighAccuracy: true,
         timeout: 200000,
         maximumAge: 1000,
+        distanceFilter:0,
       },
     );
 
@@ -143,6 +151,18 @@ class App extends Component {
     };
   };
 
+  onSelectDestination = (lat, lng) => {
+    let destination = {lat,lng};
+    //Now you can do whatever you want to do with the destination coordinates
+    //For now, we will calculate distance between source and destination
+    let distanceSrcDest=this.calculateHaversineDifference(lat, lng);
+    this.setState({distanceSrcDest,destination});
+  }
+
+  calculateHaversineDifference = (lat,lng) =>{
+    return haversine({latitude:this.state.latitude,longitude:this.state.longitude},{latitude:lat,longitude:lng});
+  }
+
   render() {
     return (
       <>
@@ -163,14 +183,21 @@ class App extends Component {
               />
             </MapView>
             <View style={styles.autocomplete}>
-              <PlacesAutocomplete />
+              <PlacesAutocomplete
+                onSelectDestination={(lat,lng) => this.onSelectDestination(lat,lng)}
+              />
             </View>
             <View style={styles.distanceContainer}>
               <Text style={styles.distanceText}>
                 Distance Travelled: {this.state.distanceTravelled.toFixed(2)} km
               </Text>
             </View>
-            
+            {this.state.distanceSrcDest ?
+            <View style={styles.distanceContainer}>
+              <Text style={styles.distanceText}>
+                Distance to Destination: {this.state.distanceSrcDest.toFixed(2)} km
+              </Text>
+            </View>:null}
           </View>
         </SafeAreaView>
       </>
@@ -210,12 +237,12 @@ const styles = StyleSheet.create({
     elevation: 10,
     height: 50,
     width: 300,
-    marginVertical: 20,
+    marginVertical: 10,
     padding: 10,
   },
   distanceText: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '500',
   },
 });
 
