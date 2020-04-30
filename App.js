@@ -12,11 +12,11 @@ import {
 } from 'react-native';
 
 import Geolocation from 'react-native-geolocation-service';
-
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
-
 //Used to calculate haversine distance between two locations
 const haversine = require('haversine');
+
+import PlacesAutocomplete from './components/PlacesAutocomplete';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -65,13 +65,14 @@ class App extends Component {
     //listener for watching the position
     let watchId = Geolocation.watchPosition(
       position => {
+        console.log('=====================',position);
         const {latitude, longitude} = position.coords;
         const {routeCoordinates, distanceTravelled} = this.state;
         const newCoordinate = {latitude, longitude};
 
         this.setState({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude,
+          longitude,
           error: null,
           routeCoordinates: routeCoordinates.concat([newCoordinate]),
           distanceTravelled:
@@ -86,7 +87,6 @@ class App extends Component {
         enableHighAccuracy: true,
         timeout: 200000,
         maximumAge: 1000,
-        distanceFilter: 0,
       },
     );
 
@@ -155,18 +155,22 @@ class App extends Component {
               region={this.getMapRegion()}>
               <Polyline
                 coordinates={this.state.routeCoordinates}
-                strokeWidth={5}
+                strokeWidth={3}
               />
               <Marker
                 coordinate={this.getMapRegion()}
                 image={require('./scooter.png')}
               />
             </MapView>
+            <View style={styles.autocomplete}>
+              <PlacesAutocomplete />
+            </View>
             <View style={styles.distanceContainer}>
               <Text style={styles.distanceText}>
                 Distance Travelled: {this.state.distanceTravelled.toFixed(2)} km
               </Text>
             </View>
+            
           </View>
         </SafeAreaView>
       </>
@@ -180,9 +184,15 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT,
     justifyContent: 'flex-end',
     alignItems: 'center',
+    position:'relative',
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  autocomplete: {
+    position:'absolute',
+    top:15,
+    width:330,
   },
   distanceContainer: {
     flexDirection: 'row',
@@ -197,7 +207,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 1, height: 3},
     shadowOpacity: 0.8,
     shadowRadius: 2,
-    elevation: 2,
+    elevation: 10,
     height: 50,
     width: 300,
     marginVertical: 20,
